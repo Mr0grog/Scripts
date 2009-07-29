@@ -1,0 +1,7 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Remove .svn dirs/files from working directory (recursively)
+# -------------------------------------------------------------
+
+find . -name ".svn" -print0 | xargs -0 rm -rfv
+

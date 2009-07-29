@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+"""
+Better SVN Logs
+"""
+
+import sys, os
+from optparse import OptionParser
+
+SPLIT = "------------------------------------------------------------------------"
+
+parser = OptionParser()
+parser.add_option("-u", "--user", dest="user",
+                  help="Get commit logs for USERNAME", metavar="USERNAME")
+parser.add_option("-r", dest="rev",
+                  help="Get commit logs for REVISION(S)", metavar="REVISION(S)")
+parser.add_option("-v",
+                  action="store_true", dest="verbose", default=False,
+                  help="Get verbose listing")
+parser.add_option("-f", dest="path",
+                  default="",
+                  help="Limit to changes for a particular path")
+
+options, args = parser.parse_args()
+
+# Stop if no rev
+if not options.rev:
+    print "\nNo revision!\nUse option '-r REV(:REV2)'"
+    exit()
+
+verbosity = options.verbose and "-v" or ""
+
+# Do SVN command
+stdout = os.popen('svn log -r ' + options.rev + ' ' + verbosity + ' ' + options.path)
+text = stdout.read()
+
+
+logs = text.split(SPLIT)
+
+results = []
+for log in logs:
+    if ("| " + options.user + " |") in log:
+        results.append(log)
+
+print SPLIT + SPLIT.join(results)

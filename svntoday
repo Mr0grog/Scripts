@@ -1,0 +1,9 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# View SVN log for commits today.
+# Feel free to pass additional args, like "-v"
+# Must be run in a working copy.
+# -------------------------------------------------------------
+
+TODAY=`date +%Y-%m-%d`
+svn log -r HEAD:{$TODAY} $1

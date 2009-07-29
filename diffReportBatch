@@ -1,0 +1,41 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Output reports about a series of SVN changesets; each 
+# includes the check-in comments and a diff for all changes.
+# This is basically a batch version of diffReport.
+# 
+# Use: diffReportBatch start_rev end_rev [output directory]
+# Ex: diffReport 128 129 /reports
+#     outputs /reports/rev128.diff, /reports/rev129.diff
+# 
+# NOTE: Working dir must be an SVN working copy!
+# -------------------------------------------------------------
+
+if [ $# -lt 2 ]
+then
+	echo "You must provide two arguments: a start and an end revision."
+	exit 1
+fi
+
+rev=$1
+end_rev=$2
+writedir='./'
+
+if [ $# -ge 3 ]
+then
+	if test -d $3
+	then
+		writedir=$3
+	else
+		echo "Location was not a directory"
+		exit 2
+	fi
+fi
+
+while [ $rev -le $end_rev ]
+do
+	svn log -v -r $rev > "$writedir/rev$rev.diff"
+	svn diff -c $rev --diff-cmd=diff -x -U8 >> "$writedir/rev$rev.diff"
+	echo "Logged Revision $rev to $writedir/rev$rev.diff"
+	rev=`expr $rev + 1`
+done

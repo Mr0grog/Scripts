@@ -1,0 +1,8 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Simple shortcut for running jsdoc-toolkit.
+# Use: jsdoct [normal jsdoc-toolkit args here]
+# -------------------------------------------------------------
+
+# cd /usr/local/jsdoc-toolkit
+java -jar /usr/local/jsdoc-toolkit/jsrun.jar /usr/local/jsdoc-toolkit/app/run.js $*

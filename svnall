@@ -1,0 +1,22 @@
+# -------------------------------------------------------------
+# Add and Remove all new/missing files to SVN. Basically, this 
+# says to accept your file-system as-is for the next commit.
+# 
+# Based on technique from http://cefn.com/blog/escapebash.html
+# -------------------------------------------------------------
+
+adds=`svn status | awk '/\?/' | sed 's/\? *//g' | sed 's/\([ "(){}$#\&~'"'"']\)/\\\1/g'`
+if [ "$adds" ]
+then
+	svn add $adds
+else
+	echo "Nothing to add"
+fi
+
+removes=`svn status | awk '/!/' | sed 's/! *//g' | sed 's/\([ "(){}$#\&~'"'"']\)/\\\1/g'`
+if [ "$removes" ]
+then
+	svn remove $removes
+else
+	echo "Nothing to remove"
+fi

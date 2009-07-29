@@ -1,0 +1,7 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Remove .DS_Store files from working directory (recursively)
+# -------------------------------------------------------------
+
+find . -name ".DS_Store" -print0 | xargs -0 rm -rfv
+

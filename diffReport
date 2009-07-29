@@ -1,0 +1,37 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Create a report about an SVN changeset/revision which
+# includes the check-in comments and a diff for all changes.
+# 
+# Use: diffReport revision [output directory]
+# Ex: diffReport 128 /reports
+#     outputs /reports/rev128.diff
+# 
+# NOTE: Working dir must be an SVN working copy!
+# -------------------------------------------------------------
+
+if [ $# -lt 1 ]
+then
+	echo "You must provide revision number to check."
+	exit 1
+fi
+
+rev=$1
+writedir='./'
+
+if [ $# -ge 2 ]
+then
+	if test -d $2
+	then
+		writedir=$2
+	else
+		echo "Location was not a directory"
+		exit 2
+	fi
+fi
+
+writefile="$writedir/rev$rev.diff"
+
+svn log -v -r $rev > "$writefile"
+svn diff -c $rev --diff-cmd=diff -x -U8 >> "$writefile"
+echo "Logged Revision $rev to $writefile"
