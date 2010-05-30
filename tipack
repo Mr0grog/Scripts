@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+"""
+Simplified interface to the Titanium SDK CLI
+"""
+
+import sys, os, subprocess
+from optparse import OptionParser
+import elementtree.ElementTree as ET
+
+TI_PATH = 'TIPATH' in os.environ and os.environ['TIPATH'] or os.path.join('~', 'Library', 'Application Support', 'Titanium')
+
+def greater_version(a, b):
+	if a[0] > b[0] or (a[0] == b[0] and (a[1] > b[1] or (a[1] == b[1] and a[2] > b[2]))):
+		return a
+	return b
+
+def find_latest_ver(ti_path):
+	max_ver = (0,0,0)
+	for item in os.listdir(os.path.join(ti_path, 'sdk', 'osx')):
+		max_ver = greater_version(max_ver, item.split('.'))
+		
+	return ".".join(max_ver)
+
+
+
+if __name__ == '__main__':
+	parser = OptionParser()
+	parser.add_option("-v", "--version", dest="version",
+	                  help="Ti SDK version to build with, e.g. 1.0.0", metavar="VERSION")
+	parser.add_option("-s", "--sdk", dest="sdk",
+	                  help="Path to Ti Resources, e.g. /Library/Application Support/Titanium", metavar="PATH",
+	                  default=TI_PATH)
+	parser.add_option("-t", "--type", dest="type", default="bundle",
+	                  help="Build type: 'bundle' or 'network'", metavar="TYPE")
+	parser.add_option("-i", action="store_false", dest="clean", default=True,
+	                  help="Build incrementally, i.e. do not clean out previous builds first")
+	parser.add_option("-r", action="store_true", dest="run", default=False,
+	                  help="Run app after building")
+	options, args = parser.parse_args()
+
+	# LOTS OF PATHS! (hint: that's why I wrote this script)
+	app_path = len(args) > 0 and options.args[0] or os.getcwd() # Package current dir if not specified
+	build_path = os.path.join(app_path, 'dist', 'osx')
+	ti_path = os.path.expanduser(options.sdk)
+	sdk_ver = options.version or find_latest_ver(ti_path)
+	asset_path = os.path.join(ti_path, 'sdk', 'osx', sdk_ver)
+	build_script = os.path.join(asset_path, 'tibuild.py')
+
+	# Get app info
+	tiapp = ET.parse(os.path.join(app_path, 'tiapp.xml'))
+	app_name = tiapp.findtext('name')
+
+	# And go!
+	if (options.clean):
+		print("Cleaning")
+		os.popen('rm -rf "%s.app"' % os.path.join(build_path, app_name))
+	
+	print("Packing %s with SDK %s" % (app_name, sdk_ver))
+	cmd = [build_script, '-t', options.type, '-s', ti_path, '-a', asset_path, '-d', build_path]
+	if options.run:
+		cmd.append('-r')
+	cmd.append(app_path)
+	subprocess.call(cmd)
